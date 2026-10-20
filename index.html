@@ -3,23 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🚗 香港車友出車盲盒 - 直開高德App版</title>
+    <title>📸 IG 媒體極速提取器</title>
     <style>
         :root {
-            /* 柔和莫蘭迪配色系統 */
-            --bg-dark: #1E232E;       
-            --bg-card: #2A3143;       
-            --primary: #82A0D8;       
-            --primary-glow: rgba(130, 160, 216, 0.25);
-            --text-main: #E2E8F0;     
-            --text-muted: #94A3B8;    
-            --tag-bg: rgba(130, 160, 216, 0.15);
-            --nav-btn-bg: #5D8A66;    
+            --bg-dark: #121318;
+            --bg-card: #1C1E26;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --ig-grad: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --primary: #E1306C;
+            --secondary: #833AB4;
+            --success: #10B981;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(131, 58, 180, 0.15), transparent 35%),
+                radial-gradient(circle at 90% 80%, rgba(225, 48, 108, 0.12), transparent 35%);
             color: var(--text-main);
             margin: 0;
             padding: 16px;
@@ -27,24 +35,28 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
         }
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            padding-bottom: 40px;
         }
 
         .header {
             text-align: center;
+            margin: 8px 0 4px 0;
         }
         .header h2 {
-            color: var(--primary);
-            font-size: 22px;
-            margin: 0 0 4px 0;
+            font-size: 24px;
+            margin: 0 0 6px 0;
+            background: var(--ig-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
             letter-spacing: 0.5px;
         }
         .header p {
@@ -53,120 +65,225 @@
             margin: 0;
         }
 
-        .map-card {
+        /* 輸入區卡片 */
+        .card {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 24px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .url-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 14px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .url-input:focus {
+            border-color: var(--primary);
+        }
+
+        .paste-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .paste-btn:active { transform: scale(0.95); }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--ig-grad);
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(225, 48, 108, 0.3);
+            transition: transform 0.1s;
+        }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* 狀態與結果區 */
+        #resultArea {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .shortcode-badge {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(225, 48, 108, 0.1);
+            border: 1px solid rgba(225, 48, 108, 0.3);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+        .shortcode-badge span { color: #F472B6; font-weight: bold; font-family: monospace; }
+
+        .section-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 多圖/第幾張選擇器 */
+        .slide-selector {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+        .slide-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .slide-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* 媒體預覽框 */
+        .media-viewer {
+            width: 100%;
+            min-height: 220px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
-            gap: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            position: relative;
+            justify-content: center;
             overflow: hidden;
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .media-viewer img, .media-viewer video {
+            max-width: 100%;
+            max-height: 420px;
+            border-radius: 8px;
+            display: block;
+        }
+        .viewer-placeholder {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.5;
         }
 
-        .radar-circle {
-            width: 110px;
-            height: 110px;
-            border: 2px dashed var(--primary);
-            border-radius: 50%;
+        /* 下載通道按鈕群 */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .dl-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 13px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            animation: pulseRadar 2.5s infinite ease-out;
-            margin: 10px 0;
-            opacity: 0.8;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .dl-btn:active { background: rgba(255, 255, 255, 0.15); }
+        .dl-btn.video-btn {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34D399;
+        }
+        .dl-btn.photo-btn {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #38BDF8;
+        }
+        .dl-btn.full-width {
+            grid-column: 1 / -1;
         }
 
-        @keyframes pulseRadar {
-            0% { box-shadow: 0 0 0 0 var(--primary-glow); }
-            50% { box-shadow: 0 0 0 15px rgba(130, 160, 216, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(130, 160, 216, 0); }
+        /* 官方內嵌預覽容器 */
+        .embed-container {
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 480px;
+        }
+        .embed-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        .radar-icon {
-            font-size: 38px;
+        /* 教學提示卡 */
+        .tips-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        .tips-card strong { color: var(--text-main); }
 
-        .destination-title {
-            font-size: 22px;
+        /* 進階設定摺疊區 */
+        details {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        summary {
+            cursor: pointer;
             font-weight: bold;
             color: var(--text-main);
-            margin: 0;
-        }
-
-        .destination-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-            margin: 0;
-        }
-
-        .tag-row {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-
-        .tag {
-            background: var(--tag-bg);
-            color: var(--primary);
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .roll-btn {
-            background: linear-gradient(135deg, #82A0D8 0%, #6883B6 100%);
-            color: #111827;
-            font-weight: bold;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            font-size: 17px;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 15px var(--primary-glow);
-            transition: transform 0.1s;
-        }
-        .roll-btn:active { transform: scale(0.97); }
-
-        .nav-btn {
-            background: var(--nav-btn-bg);
-            color: #fff;
-            font-weight: bold;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 15px;
-            cursor: pointer;
-            width: 100%;
-            text-decoration: none;
-            display: inline-block;
-            box-sizing: border-box;
-            box-shadow: 0 4px 12px rgba(93, 138, 102, 0.2);
-            margin-top: 8px;
-        }
-
-        .history-card {
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 13px;
-        }
-        .history-card h4 {
-            margin: 0 0 8px 0;
-            color: var(--text-muted);
-            font-size: 13px;
-            font-weight: normal;
+            outline: none;
         }
     </style>
 </head>
@@ -174,118 +291,222 @@
 
 <div class="container">
     <div class="header">
-        <h2>🚗 香港車友出車盲盒</h2>
-        <p>23個精選遊車河勝地，直開高德地圖 App</p>
+        <h2>📸 IG 媒體極速提取器</h2>
+        <p>支援 Reels / 多圖 Post 淨化與原始檔提取</p>
     </div>
 
-    <div class="map-card" id="mapCard">
-        <div class="radar-circle">
-            <div class="radar-icon" id="destIcon">🗺️</div>
+    <!-- 輸入面板 -->
+    <div class="card">
+        <div class="input-wrapper">
+            <input type="text" id="igUrl" class="url-input" placeholder="貼上 Instagram 貼文或 Reels 連結...">
+            <button class="paste-btn" onclick="pasteClipboard()">📋 貼上</button>
         </div>
-        <div class="tag-row" id="destTags">
-            <span class="tag">隨時候命</span>
+        <button class="submit-btn" onclick="parseInstagramUrl()">⚡ 立即提取媒體</button>
+    </div>
+
+    <!-- 提取結果面板 -->
+    <div id="resultArea">
+        <div class="shortcode-badge">
+            <span id="postTypeLabel">📌 貼文代碼 (Shortcode)</span>
+            <span id="shortcodeText">---</span>
         </div>
-        <h3 class="destination-title" id="destTitle">準備出車</h3>
-        <p class="destination-desc" id="destDesc">點擊下方按鈕，隨機抽中香港開車勝地！</p>
-        
-        <a id="navLink" href="#" class="nav-btn" style="display: none;">🗺️ 開啟高德地圖導航</a>
+
+        <!-- 原始媒體提取卡 -->
+        <div class="card">
+            <div class="section-label">
+                <span>🎯 多圖 / 段落切換 (如貼文有多張相/片)</span>
+                <span id="currentSlideLabel" style="color:var(--primary);">第 1 項</span>
+            </div>
+
+            <!-- 1-10 張切換器 -->
+            <div class="slide-selector" id="slideSelector"></div>
+
+            <!-- 即時媒體預覽器 -->
+            <div class="media-viewer" id="mediaViewer">
+                <div class="viewer-placeholder">
+                    點擊下方「載入原始相片」或「載入原始影片」<br>即可在此直接預覽及長按儲存
+                </div>
+            </div>
+
+            <!-- 提取按鈕 -->
+            <div class="action-grid">
+                <button class="dl-btn photo-btn" onclick="previewRawMedia('image')">🖼️ 載入原始相片</button>
+                <button class="dl-btn video-btn" onclick="previewRawMedia('video')">🎬 載入原始影片</button>
+                <a id="directVideoLink" href="#" target="_blank" class="dl-btn full-width">
+                    🚀 在新分頁直開原始媒體流 (長按儲存)
+                </a>
+                <a id="altGatewayLink" href="#" target="_blank" class="dl-btn full-width" style="color:#C084FC; border-color:rgba(192,132,252,0.3);">
+                    🔓 備用通道：打開 VxInstagram 免登入頁
+                </a>
+            </div>
+        </div>
+
+        <!-- 內嵌預覽卡 -->
+        <div class="card">
+            <div class="section-label">
+                <span>👁️ 官方免登入內嵌視窗 (可直接在內播放/長按圖片)</span>
+            </div>
+            <div class="embed-container">
+                <iframe id="igEmbedFrame" src=""></iframe>
+            </div>
+        </div>
     </div>
 
-    <button class="roll-btn" onclick="rollDestination()">🎲 隨機決定！去邊度好？</button>
-
-    <div class="history-card">
-        <h4>📜 最近抽中記錄</h4>
-        <div id="historyList" style="color: var(--text-muted); font-size: 13px;">暫無記錄</div>
+    <!-- 使用小貼士 -->
+    <div class="tips-card">
+        <strong>💡 iPhone / iPad 儲存小貼士：</strong><br>
+        • <strong>儲存相片</strong>：點擊「載入原始相片」後，直接<strong>長按圖片</strong>揀「加入相片」即可。<br>
+        • <strong>儲存 Reels / 影片</strong>：點擊「載入原始影片」或「在新分頁直開」，待影片出現後點擊右下角「<strong>⋯</strong>」或分享掣揀「儲存到檔案」，即可放入相簿。
     </div>
+
+    <!-- 進階 RapidAPI 設定 (可選) -->
+    <details>
+        <summary>⚙️ 進階設定：自訂 RapidAPI 密鑰 (選填)</summary>
+        <p style="margin: 10px 0; font-size: 12px; line-height: 1.5;">
+            如果你有申請免費嘅 RapidAPI (Instagram Downloader API)，可以填入 API Key 解鎖底層 JSON 直接下載：
+        </p>
+        <div class="input-wrapper" style="margin-bottom:0;">
+            <input type="password" id="apiKeyInput" class="url-input" placeholder="輸入 X-RapidAPI-Key..." oninput="saveApiKey()">
+        </div>
+    </details>
 </div>
 
 <script>
-    // 23個精選 LTE Auto 推薦地點 (已加入全部 GPS 座標，解決多個搜尋結果的問題)
-    const destinations = [
-        // 港島區
-        { name: "天星碼頭多層停車場", icon: "🅿️", tags: ["港島區", "維港海景", "經典打卡"], desc: "中環經典多層停車場，背景係無敵維港海景及摩天輪。", keyword: "中環天星碼頭多層停車場", lat: 22.2831, lon: 114.1616 },
-        { name: "舊總督山頂別墅守衛室", icon: "🏛️", tags: ["港島區", "英倫風", "歷史古蹟"], desc: "山頂充滿古典英倫風味的守衛室，打卡一流。", keyword: "舊總督山頂別墅守衛室", lat: 22.2743, lon: 114.1437 },
-        { name: "司徒拔道觀景臺", icon: "🌃", tags: ["港島區", "極級夜景", "半山"], desc: "飽覽跑馬地及維港壯麗夜景的半山觀景勝地。", keyword: "司徒拔道觀景臺", lat: 22.2687, lon: 114.1751 },
-        { name: "白加道", icon: "⛰️", tags: ["港島區", "山頂纜車", "富豪地段"], desc: "可以捕捉山頂纜車擦身而過的獨特視角。", keyword: "白加道", lat: 22.2709, lon: 114.1537 },
+    let currentShortcode = '';
+    let currentSlide = 1;
 
-        // 九龍區
-        { name: "海運大廈停車場", icon: "🚢", tags: ["九龍區", "頂層靚景", "海景日落"], desc: "尖沙咀海港城頂層，盡覽無遮擋維多利亞港日落。", keyword: "海運大廈露天停車場", lat: 22.2961, lon: 114.1666 },
-        { name: "西九文化區藝術公園", icon: "🎨", tags: ["九龍區", "文青打卡", "大草地"], desc: "文化氣息濃厚，海濱長廊與大草地旁吹風散步。", keyword: "西九文化區藝術公園", lat: 22.3013, lon: 114.1578 },
-        { name: "啟德郵輪碼頭公園", icon: "🛳️", tags: ["九龍區", "超大空間", "九龍東地標"], desc: "東九龍盡頭的開闊空間，路闊車少，日夜皆宜。", keyword: "啟德郵輪碼頭公園", lat: 22.3052, lon: 114.2144 },
-        { name: "西九文化區博物館道", icon: "🏛️", tags: ["九龍區", "現代建築", "M+博物館"], desc: "M+博物館旁，充滿現代建築線條的打卡熱點。", keyword: "博物館道", lat: 22.3015, lon: 114.1596 },
-        { name: "郵輪碼頭旅遊巴停車場", icon: "🚌", tags: ["九龍區", "空間廣闊", "車友聚腳"], desc: "啟德碼頭旁的巨型停泊位，常有車友聚會。", keyword: "啟德郵輪碼頭", lat: 22.3056, lon: 114.2127 },
-        { name: "宏展街咪錶停車場", icon: "🅿️", tags: ["九龍區", "九龍灣", "工廈風"], desc: "九龍灣隱蔽咪錶位，帶點工業風的拍攝好地方。", keyword: "九龍灣宏展街", lat: 22.3245, lon: 114.2045 },
-        { name: "飛鵝山/九龍峰", icon: "⛰️", tags: ["九龍區", "九龍全景", "跑山勝地"], desc: "九龍半島最高視角，挑戰技術與飽覽夜景的首選。", keyword: "飛鵝山", lat: 22.3436, lon: 114.2223 },
-        { name: "海輝道海濱花園", icon: "🌊", tags: ["九龍區", "奧運站海旁", "寧靜海景"], desc: "大角咀海濱，望向昂船洲大橋的寧靜休憩處。", keyword: "海輝道海濱花園", lat: 22.3175, lon: 114.1534 },
+    // 載入已儲存的 API Key
+    window.onload = () => {
+        const savedKey = localStorage.getItem('ig_rapidapi_key');
+        if (savedKey) document.getElementById('apiKeyInput').value = savedKey;
+        initSlideButtons();
+    };
 
-        // 新界區
-        { name: "香港黃金海岸", icon: "🏖️", tags: ["新界區", "渡假風情", "屯門南"], desc: "充滿地中海渡假風情的海岸線與遊艇會。", keyword: "香港黃金海岸", lat: 22.3725, lon: 113.9897 },
-        { name: "葵涌八號貨櫃碼頭", icon: "🏗️", tags: ["新界區", "工業風夜景", "極具氣勢"], desc: "昂船洲大橋下，金屬感與重工業燈光極具風格。", keyword: "八號貨櫃碼頭", lat: 22.3276, lon: 114.1232 },
-        { name: "牛潭尾食水主配水庫", icon: "💧", tags: ["新界區", "隱世草地", "打卡秘境"], desc: "元朗區的隱藏打卡點，擁有大片遼闊草地。", keyword: "牛潭尾濾水廠", lat: 22.4788, lon: 114.0543 },
-        { name: "大帽山郊野公園", icon: "☁️", tags: ["新界區", "全港最高", "多霧注意"], desc: "香港最高峰路段，荃錦公路多彎，可俯瞰全港。", keyword: "大帽山郊野公園", lat: 22.4116, lon: 114.1075 },
-        { name: "青龍頭段咪錶停車場", icon: "🌅", tags: ["新界區", "青山公路", "汀九橋景"], desc: "青公遊車河必停點，可遠眺青馬及汀九橋。", keyword: "青龍頭", lat: 22.3619, lon: 114.0458 },
-        { name: "青嶼幹線觀景台", icon: "🌉", tags: ["新界區", "雙橋美景", "宏偉建築"], desc: "一次過飽覽青馬大橋及汀九橋壯麗景觀。", keyword: "青嶼幹線觀景台", lat: 22.3582, lon: 114.0768 },
-        { name: "汀九停車場", icon: "🌉", tags: ["新界區", "橋底打卡", "近距離震撼"], desc: "於汀九橋底仰望巨大橋墩，極具視覺衝擊力。", keyword: "汀九村", lat: 22.3644, lon: 114.0746 },
-        { name: "屯赤浩和街", icon: "🌴", tags: ["新界區", "日落海旁", "港版邁亞密"], desc: "無敵海景加棕櫚樹大道，車友熱門打卡勝地。", keyword: "浩和街", lat: 22.3813, lon: 113.9234 },
-        { name: "清水灣第二灘咪錶停車位", icon: "🏖️", tags: ["新界區", "星空海灘", "山路駕駛"], desc: "清水灣道起伏多彎，到達後可享受寧靜海灘。", keyword: "清水灣第二灣泳灘", lat: 22.3031, lon: 114.2882 },
-        { name: "西貢海鮮街", icon: "🦞", tags: ["新界區", "美食遊車河", "假日熱鬧"], desc: "入西貢遊車河必到之處，吹海風食海鮮。", keyword: "西貢海鮮街", lat: 22.3815, lon: 114.2731 },
-        { name: "大尾篤咪錶泊車位", icon: "🚲", tags: ["新界區", "水壩靚景", "吐露港"], desc: "水壩兩旁盡是海景，駕車兜風極具悠閒感。", keyword: "大美督", lat: 22.4727, lon: 114.2346 }
-    ];
+    function saveApiKey() {
+        const key = document.getElementById('apiKeyInput').value.trim();
+        localStorage.setItem('ig_rapidapi_key', key);
+    }
 
-    let history = [];
+    // 建立 1 - 10 項的按鈕 (對應 IG 最多 10 張圖/片)
+    function initSlideButtons() {
+        const container = document.getElementById('slideSelector');
+        container.innerHTML = '';
+        for (let i = 1; i <= 10; i++) {
+            const btn = document.createElement('button');
+            btn.className = `slide-btn ${i === 1 ? 'active' : ''}`;
+            btn.innerText = `第 ${i} 項`;
+            btn.onclick = () => selectSlide(i, btn);
+            container.appendChild(btn);
+        }
+    }
 
-    function rollDestination() {
-        const titleEl = document.getElementById('destTitle');
-        const descEl = document.getElementById('destDesc');
-        const iconEl = document.getElementById('destIcon');
-        const tagsEl = document.getElementById('destTags');
-        const navBtn = document.getElementById('navLink');
-        const historyEl = document.getElementById('historyList');
+    function selectSlide(index, btnEl) {
+        currentSlide = index;
+        document.querySelectorAll('.slide-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+        document.getElementById('currentSlideLabel').innerText = `第 ${index} 項`;
+        updateGatewayLinks();
+    }
 
-        titleEl.innerText = "🎲 雷達搜尋中...";
-        descEl.innerText = "正在為你篩選今晚最佳路線...";
-        iconEl.innerText = "🔄";
-        tagsEl.innerHTML = '<span class="tag" style="background:transparent;">...</span>';
-        navBtn.style.display = "none";
+    // 一鍵貼上剪貼簿內容
+    async function pasteClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('igUrl').value = text;
+            parseInstagramUrl();
+        } catch (err) {
+            alert('請長按輸入框手動貼上連結（瀏覽器需要權限先可以讀取剪貼簿）');
+        }
+    }
 
-        setTimeout(() => {
-            const randomIndex = Math.floor(Math.random() * destinations.length);
-            const dest = destinations[randomIndex];
+    // 解析 IG 連結，提取 Shortcode
+    function parseInstagramUrl() {
+        const rawUrl = document.getElementById('igUrl').value.trim();
+        if (!rawUrl) {
+            alert('請先貼上 Instagram 連結！');
+            return;
+        }
 
-            iconEl.innerText = dest.icon;
-            titleEl.innerText = dest.name;
-            descEl.innerText = dest.desc;
+        // 支援 /p/, /reel/, /reels/, /tv/, /share/
+        const regex = /instagram\.com\/(?:[A-Za-z0-9_.]+\/)?(p|reels|reel|tv)\/([A-Za-z0-9_-]+)/i;
+        const match = rawUrl.match(regex);
 
-            tagsEl.innerHTML = '';
-            dest.tags.forEach(tag => {
-                tagsEl.innerHTML += `<span class="tag">${tag}</span>`;
-            });
+        if (!match || !match[2]) {
+            alert('認唔到呢條 IG 連結喎！請確保連結包含 /p/ 或 /reel/ （如果係 /share/ 短連，請先喺瀏覽器打開一次再複製網址）。');
+            return;
+        }
 
-            // 核心修改：改為直接規劃路線模式 (Path/Route)，並加入精確的經緯度 (lat, lon)
-            const isIOS = /Mac|iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-            const keyword = encodeURIComponent(dest.keyword);
-            
-            // 預設為網頁版路線規劃
-            let appUrl = `https://uri.amap.com/navigation?to=${dest.lon},${dest.lat},${keyword}&mode=car&policy=1`; 
+        const type = match[1].toLowerCase();
+        currentShortcode = match[2];
+        currentSlide = 1;
+        initSlideButtons();
 
-            if (isIOS) {
-                // iOS 專屬：直接跳轉路線規劃 (t=0 為駕車模式, dev=1 代表使用標準 GPS)
-                appUrl = `iosamap://path?sourceApplication=HKDriveBox&dname=${keyword}&dlat=${dest.lat}&dlon=${dest.lon}&t=0&dev=1`;
-            } else if (isAndroid) {
-                // Android 專屬：直接跳轉路線規劃
-                appUrl = `androidamap://route?sourceApplication=HKDriveBox&dname=${keyword}&dlat=${dest.lat}&dlon=${dest.lon}&t=0&dev=1`;
-            }
+        // 更新 UI 顯示
+        document.getElementById('resultArea').style.display = 'flex';
+        document.getElementById('postTypeLabel').innerText = type.includes('reel') ? '🎬 Reels 短片代碼' : '📸 貼文代碼 (Post ID)';
+        document.getElementById('shortcodeText').innerText = currentShortcode;
 
-            navBtn.href = appUrl;
-            navBtn.style.display = "inline-block";
-            
-            if (!history.includes(dest.name)) {
-                history.unshift(dest.name);
-                if (history.length > 3) history.pop();
-            }
-            historyEl.innerHTML = history.join(' <br><span style="color:var(--bg-card);">▼</span><br> ');
-        }, 600);
+        // 更新官方免登入內嵌預覽
+        document.getElementById('igEmbedFrame').src = `https://www.instagram.com/p/${currentShortcode}/embed/captioned/`;
+
+        // 更新外部直連通道
+        updateGatewayLinks();
+
+        // 如果是 Reels，自動嘗試載入原始影片流
+        if (type.includes('reel')) {
+            previewRawMedia('video');
+        } else {
+            document.getElementById('mediaViewer').innerHTML = `
+                <div class="viewer-placeholder">
+                    已鎖定貼文 <strong>${currentShortcode}</strong><br>
+                    請根據內容點擊下方「載入原始相片」或「載入原始影片」
+                </div>
+            `;
+        }
+    }
+
+    // 更新開源代理直連網址 (利用 InstaFix / ddinstagram 架構)
+    function updateGatewayLinks() {
+        if (!currentShortcode) return;
+        const rawVideoUrl = `https://www.ddinstagram.com/videos/${currentShortcode}/${currentSlide}`;
+        const vxPageUrl = `https://www.vxinstagram.com/p/${currentShortcode}/`;
+
+        document.getElementById('directVideoLink').href = rawVideoUrl;
+        document.getElementById('altGatewayLink').href = vxPageUrl;
+    }
+
+    // 在預覽框直接載入原始 Image 或 Video 串流
+    function previewRawMedia(mediaType) {
+        if (!currentShortcode) return;
+        const viewer = document.getElementById('mediaViewer');
+
+        if (mediaType === 'image') {
+            const imgUrl = `https://www.ddinstagram.com/images/${currentShortcode}/${currentSlide}`;
+            viewer.innerHTML = `
+                <img src="${imgUrl}" alt="IG Photo" onerror="handleMediaError('相片')">
+                <div style="padding:8px; font-size:12px; color:#38BDF8;">💡 長按上方圖片即可儲存至手機相簿</div>
+            `;
+        } else {
+            const vidUrl = `https://www.ddinstagram.com/videos/${currentShortcode}/${currentSlide}`;
+            viewer.innerHTML = `
+                <video src="${vidUrl}" controls playsinline autoplay loop onerror="handleMediaError('影片')"></video>
+                <div style="padding:8px; font-size:12px; color:#34D399;">💡 點擊影片全螢幕或右下角選單即可下載 MP4</div>
+            `;
+            document.getElementById('directVideoLink').href = vidUrl;
+        }
+    }
+
+    function handleMediaError(typeStr) {
+        const viewer = document.getElementById('mediaViewer');
+        viewer.innerHTML = `
+            <div class="viewer-placeholder" style="color:#F87171;">
+                ⚠️ 無法直接載入第 ${currentSlide} 項嘅${typeStr}。<br>
+                <span style="color:var(--text-muted); font-size:12px;">
+                    可能原因：呢格係另一種格式（例如相片當咗影片開）、私人帳號、或者代理伺服器繁忙。<br>
+                    請試下切換「載入原始相片/影片」或點擊下方備用通道。
+                </span>
+            </div>
+        `;
     }
 </script>
 
